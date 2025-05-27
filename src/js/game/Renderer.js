@@ -4,18 +4,18 @@ export class Renderer {
         this.ctx = canvas.getContext('2d');
         this.width = canvas.width;
         this.height = canvas.height;
-        
+
         // Animation properties
         this.animations = [];
         this.particles = [];
-        
+
         // Character positions
         this.player1Position = { x: 150, y: 200 };
         this.player2Position = { x: 650, y: 200 };
-        
+
         // Background elements
         this.backgroundElements = this.generateBackground();
-        
+
         this.setupCanvas();
     }
 
@@ -23,21 +23,21 @@ export class Renderer {
         // Set up high DPI canvas
         const dpr = window.devicePixelRatio || 1;
         const rect = this.canvas.getBoundingClientRect();
-        
+
         this.canvas.width = rect.width * dpr;
         this.canvas.height = rect.height * dpr;
         this.ctx.scale(dpr, dpr);
-        
+
         this.canvas.style.width = rect.width + 'px';
         this.canvas.style.height = rect.height + 'px';
-        
+
         this.width = rect.width;
         this.height = rect.height;
     }
 
     generateBackground() {
         const elements = [];
-        
+
         // Generate floating particles
         for (let i = 0; i < 20; i++) {
             elements.push({
@@ -49,7 +49,7 @@ export class Renderer {
                 color: `hsl(${Math.random() * 60 + 180}, 70%, 60%)`
             });
         }
-        
+
         return elements;
     }
 
@@ -63,10 +63,10 @@ export class Renderer {
         gradient.addColorStop(0, '#2c3e50');
         gradient.addColorStop(0.5, '#34495e');
         gradient.addColorStop(1, '#2c3e50');
-        
+
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.width, this.height);
-        
+
         // Draw floating background elements
         this.backgroundElements.forEach(element => {
             this.ctx.save();
@@ -76,7 +76,7 @@ export class Renderer {
             this.ctx.arc(element.x, element.y, element.size, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.restore();
-            
+
             // Animate elements
             element.y -= element.speed;
             if (element.y < -10) {
@@ -84,11 +84,11 @@ export class Renderer {
                 element.x = Math.random() * this.width;
             }
         });
-        
+
         // Draw arena floor
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
         this.ctx.fillRect(0, this.height - 50, this.width, 50);
-        
+
         // Draw center line
         this.ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
         this.ctx.lineWidth = 2;
@@ -106,38 +106,38 @@ export class Renderer {
 
         const { x, y } = position;
         const size = 80;
-        
+
         this.ctx.save();
-        
+
         // Draw character glow if active
         if (isActive) {
             this.ctx.shadowColor = character.color;
             this.ctx.shadowBlur = 20;
         }
-        
+
         // Draw character background circle
         this.ctx.fillStyle = character.color;
         this.ctx.globalAlpha = 0.3;
         this.ctx.beginPath();
         this.ctx.arc(x, y, size / 2, 0, Math.PI * 2);
         this.ctx.fill();
-        
+
         this.ctx.globalAlpha = 1;
-        
+
         // Draw character icon
         this.ctx.font = `${size * 0.6}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fillText(character.icon, x, y);
-        
+
         // Draw character border
         this.ctx.strokeStyle = isActive ? '#ffffff' : character.color;
         this.ctx.lineWidth = isActive ? 4 : 2;
         this.ctx.beginPath();
         this.ctx.arc(x, y, size / 2, 0, Math.PI * 2);
         this.ctx.stroke();
-        
+
         // Draw defending indicator
         if (character.isDefending) {
             this.ctx.strokeStyle = '#00d4ff';
@@ -146,38 +146,38 @@ export class Renderer {
             this.ctx.arc(x, y, size / 2 + 10, 0, Math.PI * 2);
             this.ctx.stroke();
         }
-        
+
         // Draw HP bar above character
         this.drawHealthBar(x, y - size / 2 - 30, character);
-        
+
         // Draw character name
         this.ctx.font = '16px Orbitron';
         this.ctx.fillStyle = '#ffffff';
         this.ctx.textAlign = 'center';
         this.ctx.fillText(player.name, x, y + size / 2 + 20);
-        
+
         this.ctx.restore();
     }
 
     drawHealthBar(x, y, character) {
         const barWidth = 100;
         const barHeight = 8;
-        const hpPercentage = character.getHPPercentage() / 100;
-        
+        const hpPercentage = (character.currentHP / character.maxHP) * 100;
+
         // Background
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         this.ctx.fillRect(x - barWidth / 2, y, barWidth, barHeight);
-        
+
         // HP fill
-        const hpColor = hpPercentage > 0.6 ? '#4ecdc4' : hpPercentage > 0.3 ? '#f39c12' : '#e74c3c';
+        const hpColor = hpPercentage > 60 ? '#4ecdc4' : hpPercentage > 30 ? '#f39c12' : '#e74c3c';
         this.ctx.fillStyle = hpColor;
-        this.ctx.fillRect(x - barWidth / 2, y, barWidth * hpPercentage, barHeight);
-        
+        this.ctx.fillRect(x - barWidth / 2, y, barWidth * (hpPercentage / 100), barHeight);
+
         // Border
         this.ctx.strokeStyle = '#ffffff';
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(x - barWidth / 2, y, barWidth, barHeight);
-        
+
         // HP text
         this.ctx.font = '12px Orbitron';
         this.ctx.fillStyle = '#ffffff';
@@ -195,7 +195,7 @@ export class Renderer {
             toPos: { ...toPos },
             callback: callback
         };
-        
+
         this.animations.push(animation);
         this.createImpactParticles(toPos);
     }
@@ -209,7 +209,7 @@ export class Renderer {
             pos: { ...pos },
             callback: callback
         };
-        
+
         this.animations.push(animation);
         this.createSpecialParticles(pos, type);
     }
@@ -222,7 +222,7 @@ export class Renderer {
             pos: { ...pos },
             callback: callback
         };
-        
+
         this.animations.push(animation);
         this.createHealParticles(pos);
     }
@@ -248,9 +248,9 @@ export class Renderer {
             fireball: '#e67e22',
             multiShot: '#00d4ff'
         };
-        
+
         const color = colors[type] || '#ffffff';
-        
+
         for (let i = 0; i < 15; i++) {
             this.particles.push({
                 x: pos.x + (Math.random() - 0.5) * 40,
@@ -282,27 +282,27 @@ export class Renderer {
 
     updateAnimations() {
         const currentTime = Date.now();
-        
+
         // Update animations
         this.animations = this.animations.filter(animation => {
             const elapsed = currentTime - animation.startTime;
             const progress = Math.min(elapsed / animation.duration, 1);
-            
+
             if (progress >= 1) {
                 if (animation.callback) animation.callback();
                 return false;
             }
-            
+
             return true;
         });
-        
+
         // Update particles
         this.particles = this.particles.filter(particle => {
             particle.x += particle.vx;
             particle.y += particle.vy;
             particle.life -= particle.decay;
             particle.vy += 0.2; // gravity
-            
+
             return particle.life > 0;
         });
     }
@@ -322,7 +322,7 @@ export class Renderer {
     render(gameState) {
         this.clear();
         this.drawBackground();
-        
+
         if (gameState.player1Status.hasCharacter) {
             this.drawCharacter(
                 { getCharacter: () => gameState.player1Status.character, name: gameState.player1Status.name },
@@ -330,7 +330,7 @@ export class Renderer {
                 gameState.currentPlayer && gameState.currentPlayer.id === gameState.player1Status.id
             );
         }
-        
+
         if (gameState.player2Status.hasCharacter) {
             this.drawCharacter(
                 { getCharacter: () => gameState.player2Status.character, name: gameState.player2Status.name },
@@ -338,7 +338,7 @@ export class Renderer {
                 gameState.currentPlayer && gameState.currentPlayer.id === gameState.player2Status.id
             );
         }
-        
+
         this.updateAnimations();
         this.drawParticles();
     }

@@ -21,7 +21,9 @@ body {
 
 /* Header Styles */
 header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.1);
@@ -31,6 +33,8 @@ header {
 }
 
 header h1 {
+    flex: 1;
+    text-align: center;
     font-size: 2.5rem;
     font-weight: 900;
     text-shadow: 0 0 20px #00d4ff;
@@ -40,6 +44,38 @@ header h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
+}
+
+/* Audio Controls */
+#audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.audio-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #00d4ff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.audio-btn:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+}
+
+.audio-btn.muted {
+    opacity: 0.5;
+    color: #ff6b6b;
+    border-color: #ff6b6b;
 }
 
 @keyframes gradientShift {
@@ -303,6 +339,35 @@ header h1 {
     gap: 20px;
 }
 
+/* Player Actions */
+.player-actions {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.player-actions h4 {
+    margin: 0 0 15px 0;
+    text-align: center;
+    color: #4ecdc4;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.player-actions .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.player-actions.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 #action-buttons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -408,25 +473,25 @@ header h1 {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .character-options {
         grid-template-columns: 1fr;
     }
-    
+
     #battle-ui {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     #game-canvas {
         width: 100%;
         height: auto;
     }
-    
+
     header h1 {
         font-size: 2rem;
     }
-    
+
     .game-over-buttons {
         flex-direction: column;
         align-items: center;

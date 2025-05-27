@@ -131,11 +131,11 @@ export class Player {
         }
 
         const actions = ['attack', 'defend'];
-        
+
         if (this.canUseSpecial()) {
             actions.push('special');
         }
-        
+
         if (this.canHeal()) {
             actions.push('heal');
         }
@@ -148,7 +148,7 @@ export class Player {
         if (!this.character) return '';
 
         const descriptions = {
-            attack: `Basic attack (${this.character.attack} base damage)`,
+            attack: `Basic attack (${this.character.attackPower} base damage)`,
             special: `${this.character.getSpecialName()} (${this.character.getSpecialMPCost()} MP)`,
             defend: 'Defend and restore MP (+50% defense)',
             heal: 'Restore HP (20 MP, ~30% max HP)'

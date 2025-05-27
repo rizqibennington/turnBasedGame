@@ -3,18 +3,18 @@ export class Character {
         this.type = type;
         this.name = name;
         this.level = 1;
-        
+
         // Initialize stats based on character type
         this.initializeStats();
-        
+
         // Current stats (can change during battle)
         this.currentHP = this.maxHP;
         this.currentMP = this.maxMP;
-        
+
         // Battle state
         this.isDefending = false;
         this.statusEffects = [];
-        
+
         // Battle statistics
         this.damageDealt = 0;
         this.damageReceived = 0;
@@ -26,7 +26,7 @@ export class Character {
             warrior: {
                 maxHP: 120,
                 maxMP: 30,
-                attack: 25,
+                attackPower: 25,
                 defense: 20,
                 speed: 15,
                 criticalChance: 0.1,
@@ -36,7 +36,7 @@ export class Character {
             mage: {
                 maxHP: 80,
                 maxMP: 100,
-                attack: 30,
+                attackPower: 30,
                 defense: 10,
                 speed: 20,
                 criticalChance: 0.15,
@@ -46,7 +46,7 @@ export class Character {
             archer: {
                 maxHP: 90,
                 maxMP: 50,
-                attack: 28,
+                attackPower: 28,
                 defense: 15,
                 speed: 25,
                 criticalChance: 0.25,
@@ -62,14 +62,14 @@ export class Character {
     // Combat Actions
     attack(target) {
         this.actionsUsed++;
-        const baseDamage = this.attack + Math.floor(Math.random() * 10) - 5;
+        const baseDamage = this.attackPower + Math.floor(Math.random() * 10) - 5;
         const isCritical = Math.random() < this.criticalChance;
         let damage = isCritical ? Math.floor(baseDamage * 1.5) : baseDamage;
-        
+
         // Apply defense
         const defense = target.isDefending ? target.defense * 1.5 : target.defense;
         damage = Math.max(1, damage - Math.floor(defense / 2));
-        
+
         const result = {
             action: 'attack',
             damage: damage,
@@ -80,7 +80,7 @@ export class Character {
 
         target.takeDamage(damage);
         this.damageDealt += damage;
-        
+
         return result;
     }
 
@@ -92,7 +92,7 @@ export class Character {
 
         this.actionsUsed++;
         this.currentMP -= mpCost;
-        
+
         let result;
         switch (this.type) {
             case 'warrior':
@@ -105,18 +105,18 @@ export class Character {
                 result = this.multiShot(target);
                 break;
         }
-        
+
         return result;
     }
 
     defend() {
         this.actionsUsed++;
         this.isDefending = true;
-        
+
         // Restore some MP when defending
         const mpRestore = Math.floor(this.maxMP * 0.1);
         this.currentMP = Math.min(this.maxMP, this.currentMP + mpRestore);
-        
+
         return {
             action: 'defend',
             character: this.name,
@@ -132,11 +132,11 @@ export class Character {
 
         this.actionsUsed++;
         this.currentMP -= mpCost;
-        
+
         const healAmount = Math.floor(this.maxHP * 0.3) + Math.floor(Math.random() * 10);
         const actualHeal = Math.min(healAmount, this.maxHP - this.currentHP);
         this.currentHP += actualHeal;
-        
+
         return {
             action: 'heal',
             character: this.name,
@@ -147,12 +147,12 @@ export class Character {
 
     // Special Attacks
     berserkerStrike(target) {
-        const damage = Math.floor(this.attack * 1.8) + Math.floor(Math.random() * 15);
+        const damage = Math.floor(this.attackPower * 1.8) + Math.floor(Math.random() * 15);
         const adjustedDamage = Math.max(1, damage - Math.floor(target.defense / 3));
-        
+
         target.takeDamage(adjustedDamage);
         this.damageDealt += adjustedDamage;
-        
+
         return {
             action: 'special',
             specialType: 'berserkerStrike',
@@ -164,12 +164,12 @@ export class Character {
     }
 
     fireball(target) {
-        const damage = Math.floor(this.attack * 2.2) + Math.floor(Math.random() * 20);
+        const damage = Math.floor(this.attackPower * 2.2) + Math.floor(Math.random() * 20);
         const adjustedDamage = Math.max(1, damage - Math.floor(target.defense / 4));
-        
+
         target.takeDamage(adjustedDamage);
         this.damageDealt += adjustedDamage;
-        
+
         return {
             action: 'special',
             specialType: 'fireball',
@@ -183,16 +183,16 @@ export class Character {
     multiShot(target) {
         const shots = 3;
         let totalDamage = 0;
-        
+
         for (let i = 0; i < shots; i++) {
-            const damage = Math.floor(this.attack * 0.7) + Math.floor(Math.random() * 8);
+            const damage = Math.floor(this.attackPower * 0.7) + Math.floor(Math.random() * 8);
             const adjustedDamage = Math.max(1, damage - Math.floor(target.defense / 3));
             totalDamage += adjustedDamage;
         }
-        
+
         target.takeDamage(totalDamage);
         this.damageDealt += totalDamage;
-        
+
         return {
             action: 'special',
             specialType: 'multiShot',
@@ -260,7 +260,7 @@ export class Character {
             color: this.color,
             maxHP: this.maxHP,
             maxMP: this.maxMP,
-            attack: this.attack,
+            attackPower: this.attackPower,
             defense: this.defense,
             speed: this.speed,
             criticalChance: this.criticalChance
