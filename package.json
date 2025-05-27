@@ -1,0 +1,33 @@
+{
+  "name": "turn-based-battle-arena",
+  "version": "1.0.0",
+  "description": "A turn-based strategy battle game built with HTML5 Canvas and JavaScript",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "keywords": [
+    "game",
+    "turn-based",
+    "strategy",
+    "javascript",
+    "html5",
+    "canvas",
+    "portfolio"
+  ],
+  "author": "rizqibennington",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "gh-pages": "^6.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rizqibennington/turn-based-battle-arena.git"
+  },
+  "homepage": "https://rizqibennington.github.io/turn-based-battle-arena"
+}
