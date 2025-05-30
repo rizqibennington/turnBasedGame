@@ -38,6 +38,8 @@ export class Game {
         // Start menu music
         setTimeout(() => {
             this.audioManager.playMenuMusic();
+            // Initialize mute button state
+            this.ui.updateMuteButton(this.audioManager.isMuted);
         }, 500); // Small delay to ensure audio context is ready
 
         console.log('🎮 Turn-Based Battle Arena initialized!');

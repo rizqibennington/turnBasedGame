@@ -8,6 +8,7 @@ export class AudioManager {
 
         // BGM related properties
         this.currentMusic = null;
+        this.currentTrackName = null; // Track what music should be playing
         this.musicGain = null;
         this.sfxGain = null;
         this.musicTracks = {};
@@ -368,6 +369,21 @@ export class AudioManager {
 
     toggleMute() {
         this.isMuted = !this.isMuted;
+
+        if (this.isMuted) {
+            // Stop current background music when muted
+            this.stopBackgroundMusic();
+            console.log('🔇 Audio muted');
+        } else {
+            // Restart music when unmuted if there was a track playing
+            if (this.currentTrackName) {
+                setTimeout(() => {
+                    this.playBackgroundMusic(this.currentTrackName);
+                }, 100); // Small delay to ensure audio context is ready
+            }
+            console.log('🔊 Audio unmuted');
+        }
+
         return this.isMuted;
     }
 
@@ -402,6 +418,9 @@ export class AudioManager {
 
     // Background Music Methods
     playBackgroundMusic(trackName) {
+        // Store the track name for potential restart after unmute
+        this.currentTrackName = trackName;
+
         if (this.isMuted || !this.audioContext || !this.musicTracks[trackName]) return;
 
         // Resume audio context if suspended
@@ -427,7 +446,7 @@ export class AudioManager {
 
                 // Set up looping
                 setTimeout(() => {
-                    if (this.currentMusic === musicData) {
+                    if (this.currentMusic === musicData && this.currentTrackName === trackName) {
                         this.playBackgroundMusic(trackName); // Loop the music
                     }
                 }, musicData.duration * 1000);
