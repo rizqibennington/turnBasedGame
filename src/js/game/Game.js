@@ -35,11 +35,11 @@ export class Game {
         // Start with character selection screen
         this.ui.showScreen('characterSelection');
 
-        // Start menu music
+        // Start menu music and initialize audio controls
         setTimeout(() => {
             this.audioManager.playMenuMusic();
             // Initialize mute button state
-            this.ui.updateMuteButton(this.audioManager.isMuted);
+            this.ui.initializeMuteButton(this.audioManager);
         }, 500); // Small delay to ensure audio context is ready
 
         console.log('🎮 Turn-Based Battle Arena initialized!');

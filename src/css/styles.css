@@ -73,9 +73,16 @@ header h1 {
 }
 
 .audio-btn.muted {
-    opacity: 0.5;
+    opacity: 0.7;
     color: #ff6b6b;
     border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.9; }
 }
 
 @keyframes gradientShift {

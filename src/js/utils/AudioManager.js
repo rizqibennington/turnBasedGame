@@ -488,6 +488,11 @@ export class AudioManager {
         }
     }
 
+    // Get current mute state
+    isMutedState() {
+        return this.isMuted;
+    }
+
     // Convenience methods for specific screens
     playMenuMusic() {
         this.playBackgroundMusic('menu');

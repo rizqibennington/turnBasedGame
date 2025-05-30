@@ -60,7 +60,6 @@ export class UI {
 
         // Audio controls
         this.muteBtn = document.getElementById('mute-btn');
-        console.log('🔊 Mute button found:', !!this.muteBtn);
 
         // Debug: Check if buttons were found
         console.log('🔍 Player 1 Action buttons found:');
@@ -161,19 +160,12 @@ export class UI {
 
         // Audio control events
         if (this.muteBtn) {
-            console.log('🎯 Binding mute button event');
             this.muteBtn.addEventListener('click', () => {
-                console.log('🔊 Mute button clicked!');
                 if (this.onMuteToggle) {
                     const isMuted = this.onMuteToggle();
-                    console.log('🔇 Mute state:', isMuted);
                     this.updateMuteButton(isMuted);
-                } else {
-                    console.error('❌ onMuteToggle callback not set!');
                 }
             });
-        } else {
-            console.error('❌ Mute button not found!');
         }
     }
 
@@ -441,21 +433,23 @@ export class UI {
     }
 
     updateMuteButton(isMuted) {
-        console.log('🔄 Updating mute button, isMuted:', isMuted);
         if (this.muteBtn) {
             if (isMuted) {
                 this.muteBtn.textContent = '🔇';
                 this.muteBtn.classList.add('muted');
                 this.muteBtn.title = 'Unmute Audio';
-                console.log('🔇 Button set to muted state');
             } else {
                 this.muteBtn.textContent = '🔊';
                 this.muteBtn.classList.remove('muted');
                 this.muteBtn.title = 'Mute Audio';
-                console.log('🔊 Button set to unmuted state');
             }
-        } else {
-            console.error('❌ Mute button not available for update');
+        }
+    }
+
+    // Initialize mute button with current audio state
+    initializeMuteButton(audioManager) {
+        if (this.muteBtn && audioManager) {
+            this.updateMuteButton(audioManager.isMutedState());
         }
     }
 
