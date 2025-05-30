@@ -35,21 +35,16 @@ export class Game {
         // Start with character selection screen
         this.ui.showScreen('characterSelection');
 
-        // Start menu music and initialize audio controls
+        // Start menu music
         setTimeout(() => {
             // Ensure audio context is resumed (required by browsers)
             if (this.audioManager.audioContext && this.audioManager.audioContext.state === 'suspended') {
                 this.audioManager.audioContext.resume();
             }
 
-            // Start menu music by default (unmuted)
+            // Start menu music
             this.audioManager.playMenuMusic();
-
-            // Initialize mute button state (should show unmuted by default)
-            this.ui.initializeMuteButton(this.audioManager);
-        }, 1000); // Longer delay to ensure everything is ready
-
-        console.log('🎮 Turn-Based Battle Arena initialized!');
+        }, 1000);
     }
 
     bindUIEvents() {
@@ -78,19 +73,14 @@ export class Game {
             this.resetToCharacterSelection();
         };
 
-        // Mute toggle callback
-        this.ui.onMuteToggle = () => {
-            return this.audioManager.toggleMute();
-        };
+
     }
 
     onCharacterSelected(player, characterClass) {
         if (player === 'player1') {
             this.player1.selectCharacter(characterClass);
-            console.log(`Player 1 selected: ${characterClass}`);
         } else if (player === 'player2') {
             this.player2.selectCharacter(characterClass);
-            console.log(`Player 2 selected: ${characterClass}`);
         }
     }
 
@@ -116,39 +106,27 @@ export class Game {
 
         // Update UI with initial state
         this.updateUI();
-
-        console.log('⚔️ Battle started!');
     }
 
     executePlayerAction(action, playerId) {
-        console.log(`🎯 executePlayerAction called with: ${action} by player ${playerId}`);
-
         if (!this.battleSystem || this.battleSystem.isGameOver) {
-            console.log('❌ Battle system not available or game over');
             return;
         }
 
         const currentPlayer = this.battleSystem.getCurrentPlayer();
-        console.log('Current player:', currentPlayer.name, 'ID:', currentPlayer.id);
 
         // Validate that the action is from the current player
         if (currentPlayer.id !== playerId) {
-            console.warn(`❌ Invalid turn: Player ${playerId} tried to act but it's Player ${currentPlayer.id}'s turn`);
             return;
         }
-
-        console.log('Available actions:', this.battleSystem.getCurrentPlayerActions());
 
         // Validate action
         if (!this.battleSystem.isValidAction(action)) {
-            console.warn(`Invalid action: ${action}`);
             return;
         }
 
-        console.log(`✅ Executing ${action} action...`);
         // Execute action
         const result = this.battleSystem.executeAction(action);
-        console.log('Action result:', result);
 
         if (result.success) {
             // Play appropriate sound
@@ -239,7 +217,7 @@ export class Game {
             this.ui.showGameOver(winner, battleStats);
         }, 2000);
 
-        console.log(`🎉 Game Over! ${winner.name} wins!`);
+
     }
 
     restartBattle() {
@@ -261,7 +239,7 @@ export class Game {
         // Update UI
         this.updateUI();
 
-        console.log('🔄 Battle restarted!');
+
     }
 
     resetToCharacterSelection() {
@@ -282,7 +260,7 @@ export class Game {
         // Start menu music again
         this.audioManager.playMenuMusic();
 
-        console.log('🔄 Reset to character selection');
+
     }
 
     startGameLoop() {
@@ -319,10 +297,6 @@ export class Game {
     }
 
     // Public methods for external control
-    toggleMute() {
-        return this.audioManager.toggleMute();
-    }
-
     setVolume(volume) {
         this.audioManager.setVolume(volume);
     }

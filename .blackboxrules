@@ -1,0 +1,87 @@
+# AI Agent Rules
+
+## Language and Communication
+1. Use language that is clear and easy to understand based on the user's input.  
+2. Provide direct answers without excessive explanation.  
+3. Avoid using technical terms without explanations.  
+4. The operating system used is Windows.  
+5. Always mention file names or function names explicitly when referring to them.  
+
+---
+
+## Code Structure
+1. Use a clear architecture (MVC, MVVM, Clean Architecture) when appropriate.  
+2. Separate code based on functionality (components, services, models, utils).  
+3. Apply the DRY principle (Don't Repeat Yourself).  
+4. Implement modularization to support easier maintenance.  
+
+---
+
+## Initialization
+1. At startup, the agent must read all files in the Memory Bank.  
+2. The agent must read `Todo.md` to understand current tasks and their statuses.  
+3. If there is no Memory Bank or `Todo.md`, the agent must create them **after asking the user for initial project information**.  
+4. The `Todo.md` file must follow a consistent checklist format using checkboxes.  
+
+---
+
+## Memory Bank
+1. The Memory Bank stores all permanent project information and relevant conversation context.  
+2. The agent must refer to the Memory Bank to maintain context across sessions.  
+3. The agent must update the Memory Bank after any meaningful interaction.  
+4. All important project decisions (new features, architecture choices, module design) must be briefly documented in the Memory Bank.  
+
+---
+
+## Todo Management
+1. The agent must read `Todo.md` at the start of every session.  
+2. For completed tasks:  
+   - Mark with a checkbox: `[x]`  
+   - Do not modify completed tasks unless requested by the user.  
+3. For incomplete tasks:  
+   - Keep the format `[ ]` (with a space inside the brackets).  
+   - Do not mark tasks as complete unless confirmed by the user.  
+4. When adding new tasks:  
+   - Add them with an empty checkbox `[ ]`  
+   - Include a brief task description.  
+
+---
+
+## Session Flow
+1. Start each session with a greeting and a brief summary of the current project.  
+2. Reference any active tasks from `Todo.md` that may need attention.  
+3. When continuing project work, refer to previous work for continuity.  
+4. End the session with a summary of what was done and highlight remaining tasks.  
+5. If no active tasks are found in `Todo.md`, ask the user if they want to add a new task or create the file.  
+
+---
+
+## Response Format
+1. Keep responses short and to the point.  
+2. When discussing tasks from `Todo.md`, refer to them by their exact name.  
+3. Clearly indicate when a task is completed and will be marked accordingly in `Todo.md`.  
+
+---
+
+## File Handling
+1. Always confirm before creating a new Memory Bank file.  
+2. Use consistent naming conventions for all files.  
+3. Suggest archiving old or completed project files when appropriate.  
+4. Confirm with the user before making **major changes** to files (large refactors, file deletions, folder structure changes and database changes).
+
+---
+
+## Database Credentials Handling
+1. Username, host, and password for the database must be taken from the code inside the project folder.
+2. Never hardcode or guess the credentials.
+3. Look into configuration files such as .env, config/database.php, database.php, or equivalent depending on the framework.
+4. Confirm with the user if multiple configurations are found.
+
+---
+
+## Server Management
+1. Before running any server, always check for available ports first.
+2. Be aware that common development tools like Laragon, XAMPP, WAMP, or other services might already be using standard ports (80, 3000, 8000, etc.).
+3. Use alternative ports if the default ones are occupied (e.g., 3001, 8080, 8001, 5000, etc.).
+4. Inform the user about the port being used when starting the server.
+5. Suggest stopping conflicting services if necessary, but only after user confirmation.

@@ -58,21 +58,9 @@ export class UI {
         this.player1ActionsContainer = document.getElementById('p1-actions');
         this.player2ActionsContainer = document.getElementById('p2-actions');
 
-        // Audio controls
-        this.muteBtn = document.getElementById('mute-btn');
 
-        // Debug: Check if buttons were found
-        console.log('🔍 Player 1 Action buttons found:');
-        Object.keys(this.player1Actions).forEach(action => {
-            const button = this.player1Actions[action];
-            console.log(`  P1 ${action}:`, button ? '✅ Found' : '❌ Not found');
-        });
 
-        console.log('🔍 Player 2 Action buttons found:');
-        Object.keys(this.player2Actions).forEach(action => {
-            const button = this.player2Actions[action];
-            console.log(`  P2 ${action}:`, button ? '✅ Found' : '❌ Not found');
-        });
+
 
         // Player status elements
         this.playerStatus = {
@@ -105,7 +93,6 @@ export class UI {
     }
 
     bindEvents() {
-        console.log('🎯 bindEvents() called');
         // Character selection events
         this.bindCharacterSelection();
 
@@ -113,17 +100,11 @@ export class UI {
         Object.keys(this.player1Actions).forEach(action => {
             const button = this.player1Actions[action];
             if (button) {
-                console.log(`🎯 Binding P1 ${action} button event`);
                 button.addEventListener('click', () => {
-                    console.log(`🎮 P1 ${action} button clicked!`);
                     if (this.onActionClick) {
                         this.onActionClick(action, 1); // Pass player ID
-                    } else {
-                        console.error('❌ onActionClick callback not set!');
                     }
                 });
-            } else {
-                console.error(`❌ P1 ${action} button not found!`);
             }
         });
 
@@ -131,17 +112,11 @@ export class UI {
         Object.keys(this.player2Actions).forEach(action => {
             const button = this.player2Actions[action];
             if (button) {
-                console.log(`🎯 Binding P2 ${action} button event`);
                 button.addEventListener('click', () => {
-                    console.log(`🎮 P2 ${action} button clicked!`);
                     if (this.onActionClick) {
                         this.onActionClick(action, 2); // Pass player ID
-                    } else {
-                        console.error('❌ onActionClick callback not set!');
                     }
                 });
-            } else {
-                console.error(`❌ P2 ${action} button not found!`);
             }
         });
 
@@ -157,54 +132,31 @@ export class UI {
         this.startBattleBtn.addEventListener('click', () => {
             this.onStartBattle();
         });
-
-        // Audio control events
-        if (this.muteBtn) {
-            this.muteBtn.addEventListener('click', () => {
-                if (this.onMuteToggle) {
-                    const isMuted = this.onMuteToggle();
-                    this.updateMuteButton(isMuted);
-                }
-            });
-        }
     }
 
     bindCharacterSelection() {
-        console.log('🎯 Binding character selection events...');
-
         if (!this.player1Setup || !this.player2Setup) {
-            console.error('❌ Player setup elements not found!');
             return;
         }
 
         // Player 1 character selection
         const p1Cards = this.player1Setup.querySelectorAll('.character-card');
-        console.log(`Found ${p1Cards.length} Player 1 character cards`);
-        p1Cards.forEach((card, index) => {
-            console.log(`Binding P1 card ${index}:`, card.dataset.class);
+        p1Cards.forEach((card) => {
             card.addEventListener('click', () => {
-                console.log(`P1 clicked: ${card.dataset.class}`);
                 this.selectCharacter('player1', card.dataset.class, card);
             });
         });
 
         // Player 2 character selection
         const p2Cards = this.player2Setup.querySelectorAll('.character-card');
-        console.log(`Found ${p2Cards.length} Player 2 character cards`);
-        p2Cards.forEach((card, index) => {
-            console.log(`Binding P2 card ${index}:`, card.dataset.class);
+        p2Cards.forEach((card) => {
             card.addEventListener('click', () => {
-                console.log(`P2 clicked: ${card.dataset.class}`);
                 this.selectCharacter('player2', card.dataset.class, card);
             });
         });
-
-        console.log('✅ Character selection events bound successfully');
     }
 
     selectCharacter(player, characterClass, cardElement) {
-        console.log(`🎮 Selecting character: ${player} -> ${characterClass}`);
-
         // Remove previous selection
         const playerSetup = player === 'player1' ? this.player1Setup : this.player2Setup;
         playerSetup.querySelectorAll('.character-card').forEach(card => {
@@ -216,7 +168,6 @@ export class UI {
 
         // Store selection
         this.selectedCharacters[player] = characterClass;
-        console.log('Current selections:', this.selectedCharacters);
 
         // Update selected character display
         this.updateSelectedCharacterDisplay(player, characterClass);
@@ -432,26 +383,7 @@ export class UI {
         this.startBattleBtn.disabled = true;
     }
 
-    updateMuteButton(isMuted) {
-        if (this.muteBtn) {
-            if (isMuted) {
-                this.muteBtn.textContent = '🔇';
-                this.muteBtn.classList.add('muted');
-                this.muteBtn.title = 'Click to Unmute Audio';
-            } else {
-                this.muteBtn.textContent = '🔊';
-                this.muteBtn.classList.remove('muted');
-                this.muteBtn.title = 'Click to Mute Audio';
-            }
-        }
-    }
 
-    // Initialize mute button with current audio state
-    initializeMuteButton(audioManager) {
-        if (this.muteBtn && audioManager) {
-            this.updateMuteButton(audioManager.isMutedState());
-        }
-    }
 
     // Event callbacks (to be set by Game class)
     onCharacterSelected = null;
@@ -459,5 +391,4 @@ export class UI {
     onStartBattle = null;
     onPlayAgain = null;
     onNewCharacters = null;
-    onMuteToggle = null;
 }

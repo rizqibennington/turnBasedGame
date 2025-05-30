@@ -2,27 +2,33 @@ export class AudioManager {
     constructor() {
         this.audioContext = null;
         this.sounds = {};
-        this.isMuted = false;
         this.volume = 0.7;
-        this.musicVolume = 0.3;
+        this.musicVolume = 0.4;
 
         // BGM related properties
         this.currentMusic = null;
         this.currentTrackName = null;
+        this.masterGain = null;
         this.musicGain = null;
         this.sfxGain = null;
         this.musicTracks = {};
         this.isPlaying = false;
         this.musicInterval = null;
+        this.musicOscillators = [];
 
         this.initializeAudioContext();
         this.createSounds();
-        this.createSimpleBackgroundMusic();
+        this.createEnhancedBackgroundMusic();
     }
 
     initializeAudioContext() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create master gain node for global audio control
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = 1.0;
+            this.masterGain.connect(this.audioContext.destination);
 
             // Create gain nodes for music and SFX
             this.musicGain = this.audioContext.createGain();
@@ -31,10 +37,9 @@ export class AudioManager {
             this.musicGain.gain.value = this.musicVolume;
             this.sfxGain.gain.value = this.volume;
 
-            this.musicGain.connect(this.audioContext.destination);
-            this.sfxGain.connect(this.audioContext.destination);
-
-            console.log('🎵 Audio system initialized with BGM support');
+            // Connect through master gain
+            this.musicGain.connect(this.masterGain);
+            this.sfxGain.connect(this.masterGain);
         } catch (error) {
             console.warn('Web Audio API not supported:', error);
         }
@@ -53,67 +58,162 @@ export class AudioManager {
         };
     }
 
-    createSimpleBackgroundMusic() {
-        // Create simple background music system
+    createEnhancedBackgroundMusic() {
+        // Create enhanced background music with chord progressions and harmonies
         this.musicTracks = {
-            menu: { frequency: 440, type: 'sine', tempo: 'slow' },
-            battle: { frequency: 220, type: 'sawtooth', tempo: 'fast' },
-            victory: { frequency: 523, type: 'triangle', tempo: 'medium' }
+            menu: {
+                name: 'Peaceful Preparation',
+                chords: [
+                    { notes: [261.63, 329.63, 392.00], duration: 2000 }, // C Major
+                    { notes: [293.66, 369.99, 440.00], duration: 2000 }, // D Minor
+                    { notes: [246.94, 311.13, 369.99], duration: 2000 }, // B Diminished
+                    { notes: [261.63, 329.63, 392.00], duration: 2000 }  // C Major
+                ],
+                tempo: 'slow',
+                volume: 0.3,
+                waveType: 'sine'
+            },
+            battle: {
+                name: 'Epic Battle Theme',
+                chords: [
+                    { notes: [220.00, 277.18, 329.63], duration: 800 },  // A Minor
+                    { notes: [246.94, 311.13, 369.99], duration: 800 },  // B Diminished
+                    { notes: [261.63, 329.63, 392.00], duration: 800 },  // C Major
+                    { notes: [293.66, 369.99, 440.00], duration: 800 },  // D Minor
+                    { notes: [329.63, 415.30, 493.88], duration: 1200 }, // E Major (climax)
+                    { notes: [220.00, 277.18, 329.63], duration: 800 }   // A Minor (return)
+                ],
+                tempo: 'fast',
+                volume: 0.35,
+                waveType: 'sawtooth'
+            },
+            victory: {
+                name: 'Victory Fanfare',
+                chords: [
+                    { notes: [261.63, 329.63, 392.00, 523.25], duration: 1500 }, // C Major 7th
+                    { notes: [293.66, 369.99, 440.00, 587.33], duration: 1500 }, // D Minor 7th
+                    { notes: [329.63, 415.30, 493.88, 659.25], duration: 2000 }, // E Major 7th
+                    { notes: [261.63, 329.63, 392.00, 523.25], duration: 2500 }  // C Major 7th (finale)
+                ],
+                tempo: 'medium',
+                volume: 0.4,
+                waveType: 'triangle'
+            }
         };
     }
 
-    // Simple continuous background music
-    startSimpleMusic(trackName) {
-        if (!this.audioContext || !this.musicGain || this.isMuted) return;
+    // Enhanced continuous background music with chord progressions
+    startEnhancedMusic(trackName) {
+        if (!this.audioContext || !this.musicGain) return;
 
-        this.stopSimpleMusic();
+        this.stopEnhancedMusic();
 
         const track = this.musicTracks[trackName];
-        if (!track) return;
+        if (!track) {
+            console.warn(`Track "${trackName}" not found`);
+            return;
+        }
 
         this.currentTrackName = trackName;
         this.isPlaying = true;
+        this.musicOscillators = [];
 
-        const playNote = () => {
-            if (!this.isPlaying || this.isMuted) return;
+        let chordIndex = 0;
 
-            const oscillator = this.audioContext.createOscillator();
-            const gainNode = this.audioContext.createGain();
+        const playChord = () => {
+            if (!this.isPlaying) return;
 
-            oscillator.connect(gainNode);
-            gainNode.connect(this.musicGain);
+            // Stop previous oscillators
+            this.musicOscillators.forEach(osc => {
+                try {
+                    osc.stop();
+                } catch (e) {
+                    // Oscillator might already be stopped
+                }
+            });
+            this.musicOscillators = [];
 
-            oscillator.type = track.type;
-            oscillator.frequency.setValueAtTime(track.frequency, this.audioContext.currentTime);
+            const chord = track.chords[chordIndex];
+            const chordGain = this.audioContext.createGain();
+            chordGain.connect(this.musicGain);
 
-            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(this.musicVolume, this.audioContext.currentTime + 0.1);
-            gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.8);
+            // Create multiple oscillators for harmony
+            chord.notes.forEach((frequency, index) => {
+                const oscillator = this.audioContext.createOscillator();
+                const noteGain = this.audioContext.createGain();
 
-            oscillator.start(this.audioContext.currentTime);
-            oscillator.stop(this.audioContext.currentTime + 1);
+                oscillator.connect(noteGain);
+                noteGain.connect(chordGain);
+
+                oscillator.type = track.waveType;
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+                // Create envelope for musical phrasing
+                const attackTime = 0.1;
+                const sustainTime = chord.duration / 1000 - 0.3;
+                const releaseTime = 0.2;
+
+                noteGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                noteGain.gain.linearRampToValueAtTime(
+                    track.volume / chord.notes.length,
+                    this.audioContext.currentTime + attackTime
+                );
+                noteGain.gain.setValueAtTime(
+                    track.volume / chord.notes.length,
+                    this.audioContext.currentTime + attackTime + sustainTime
+                );
+                noteGain.gain.linearRampToValueAtTime(
+                    0,
+                    this.audioContext.currentTime + attackTime + sustainTime + releaseTime
+                );
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + attackTime + sustainTime + releaseTime);
+
+                this.musicOscillators.push(oscillator);
+            });
+
+            // Move to next chord
+            chordIndex = (chordIndex + 1) % track.chords.length;
+
+            // Schedule next chord
+            if (this.isPlaying) {
+                this.musicInterval = setTimeout(playChord, chord.duration);
+            }
         };
 
-        // Play notes at intervals based on tempo
-        const intervals = {
-            slow: 2000,
-            medium: 1500,
-            fast: 1000
-        };
+        // Resume audio context if suspended
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                playChord();
+            });
+        } else {
+            playChord();
+        }
 
-        playNote(); // Play first note immediately
-        this.musicInterval = setInterval(playNote, intervals[track.tempo] || 1500);
 
-        console.log(`🎵 Playing simple BGM: ${trackName}`);
     }
 
-    stopSimpleMusic() {
+    stopEnhancedMusic() {
         this.isPlaying = false;
+
+        // Clear timeout
         if (this.musicInterval) {
-            clearInterval(this.musicInterval);
+            clearTimeout(this.musicInterval);
             this.musicInterval = null;
         }
-        console.log('⏹️ Simple music stopped');
+
+        // Stop all oscillators
+        this.musicOscillators.forEach(osc => {
+            try {
+                osc.stop();
+            } catch (e) {
+                // Oscillator might already be stopped
+            }
+        });
+        this.musicOscillators = [];
+
+
     }
 
     createAttackSound() {
@@ -285,12 +385,17 @@ export class AudioManager {
         oscillator2.stop(this.audioContext.currentTime + 0.15);
     }
 
-    playSound(soundName) {
-        if (this.isMuted || !this.audioContext) return;
+    async playSound(soundName) {
+        if (!this.audioContext) return;
 
         // Resume audio context if it's suspended (required by some browsers)
         if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            try {
+                await this.audioContext.resume();
+            } catch (error) {
+                console.warn('Failed to resume audio context:', error);
+                return;
+            }
         }
 
         if (this.sounds[soundName]) {
@@ -304,34 +409,6 @@ export class AudioManager {
 
     setVolume(volume) {
         this.volume = Math.max(0, Math.min(1, volume));
-    }
-
-    mute() {
-        this.isMuted = true;
-    }
-
-    unmute() {
-        this.isMuted = false;
-    }
-
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-
-        if (this.isMuted) {
-            // Stop current background music when muted
-            this.stopSimpleMusic();
-            console.log('🔇 Audio muted');
-        } else {
-            // Restart music when unmuted if there was a track playing
-            if (this.currentTrackName) {
-                setTimeout(() => {
-                    this.startSimpleMusic(this.currentTrackName);
-                }, 100);
-            }
-            console.log('🔊 Audio unmuted');
-        }
-
-        return this.isMuted;
     }
 
     // Play sounds for specific game events
@@ -365,11 +442,11 @@ export class AudioManager {
 
     // Background Music Methods
     playBackgroundMusic(trackName) {
-        this.startSimpleMusic(trackName);
+        this.startEnhancedMusic(trackName);
     }
 
     stopBackgroundMusic() {
-        this.stopSimpleMusic();
+        this.stopEnhancedMusic();
     }
 
     setMusicVolume(volume) {
@@ -386,10 +463,7 @@ export class AudioManager {
         }
     }
 
-    // Get current mute state
-    isMutedState() {
-        return this.isMuted;
-    }
+
 
     // Convenience methods for specific screens
     playMenuMusic() {

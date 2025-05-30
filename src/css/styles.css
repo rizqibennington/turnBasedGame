@@ -46,65 +46,7 @@ header h1 {
     animation: gradientShift 3s ease-in-out infinite;
 }
 
-/* Audio Controls */
-#audio-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
-.audio-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #00d4ff;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    color: #ffffff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    animation: unmutedGlow 3s ease-in-out infinite;
-}
-
-.audio-btn:hover {
-    background: rgba(0, 212, 255, 0.2);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-}
-
-@keyframes unmutedGlow {
-    0%, 100% {
-        box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
-    }
-    50% {
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-    }
-}
-
-.audio-btn.muted {
-    color: #ff4757;
-    border-color: #ff4757;
-    background: rgba(255, 71, 87, 0.2);
-    animation: mutePulse 1.5s ease-in-out infinite;
-    transform: scale(0.95);
-}
-
-.audio-btn.muted:hover {
-    background: rgba(255, 71, 87, 0.3);
-    box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
-}
-
-@keyframes mutePulse {
-    0%, 100% {
-        opacity: 0.8;
-        box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
-    }
-    50% {
-        opacity: 1;
-        box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
-    }
-}
 
 @keyframes gradientShift {
     0%, 100% { background-position: 0% 50%; }
