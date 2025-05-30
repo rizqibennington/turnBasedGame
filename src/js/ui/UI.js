@@ -437,11 +437,13 @@ export class UI {
             if (isMuted) {
                 this.muteBtn.textContent = '🔇';
                 this.muteBtn.classList.add('muted');
-                this.muteBtn.title = 'Unmute Audio';
+                this.muteBtn.title = 'Click to Unmute Audio';
+                console.log('🔇 Button updated to MUTED state');
             } else {
                 this.muteBtn.textContent = '🔊';
                 this.muteBtn.classList.remove('muted');
-                this.muteBtn.title = 'Mute Audio';
+                this.muteBtn.title = 'Click to Mute Audio';
+                console.log('🔊 Button updated to UNMUTED state');
             }
         }
     }

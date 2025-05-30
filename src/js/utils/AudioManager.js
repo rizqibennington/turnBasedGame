@@ -4,18 +4,20 @@ export class AudioManager {
         this.sounds = {};
         this.isMuted = false;
         this.volume = 0.7;
-        this.musicVolume = 0.4;
+        this.musicVolume = 0.3;
 
         // BGM related properties
         this.currentMusic = null;
-        this.currentTrackName = null; // Track what music should be playing
+        this.currentTrackName = null;
         this.musicGain = null;
         this.sfxGain = null;
         this.musicTracks = {};
+        this.isPlaying = false;
+        this.musicInterval = null;
 
         this.initializeAudioContext();
         this.createSounds();
-        this.createBackgroundMusic();
+        this.createSimpleBackgroundMusic();
     }
 
     initializeAudioContext() {
@@ -51,122 +53,67 @@ export class AudioManager {
         };
     }
 
-    createBackgroundMusic() {
-        // Create different background music tracks
+    createSimpleBackgroundMusic() {
+        // Create simple background music system
         this.musicTracks = {
-            menu: () => this.createMenuMusic(),
-            battle: () => this.createBattleMusic(),
-            victory: () => this.createVictoryMusic()
+            menu: { frequency: 440, type: 'sine', tempo: 'slow' },
+            battle: { frequency: 220, type: 'sawtooth', tempo: 'fast' },
+            victory: { frequency: 523, type: 'triangle', tempo: 'medium' }
         };
     }
 
-    createMenuMusic() {
-        if (!this.audioContext || !this.musicGain) return null;
+    // Simple continuous background music
+    startSimpleMusic(trackName) {
+        if (!this.audioContext || !this.musicGain || this.isMuted) return;
 
-        // Create a peaceful menu theme
-        const oscillator1 = this.audioContext.createOscillator();
-        const oscillator2 = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
+        this.stopSimpleMusic();
 
-        oscillator1.connect(gainNode);
-        oscillator2.connect(gainNode);
-        gainNode.connect(this.musicGain);
+        const track = this.musicTracks[trackName];
+        if (!track) return;
 
-        // Peaceful chord progression: C - Am - F - G
-        oscillator1.type = 'sine';
-        oscillator2.type = 'triangle';
+        this.currentTrackName = trackName;
+        this.isPlaying = true;
 
-        // Main melody
-        oscillator1.frequency.setValueAtTime(523, this.audioContext.currentTime); // C5
-        oscillator1.frequency.setValueAtTime(440, this.audioContext.currentTime + 2); // A4
-        oscillator1.frequency.setValueAtTime(349, this.audioContext.currentTime + 4); // F4
-        oscillator1.frequency.setValueAtTime(392, this.audioContext.currentTime + 6); // G4
+        const playNote = () => {
+            if (!this.isPlaying || this.isMuted) return;
 
-        // Harmony
-        oscillator2.frequency.setValueAtTime(261, this.audioContext.currentTime); // C4
-        oscillator2.frequency.setValueAtTime(220, this.audioContext.currentTime + 2); // A3
-        oscillator2.frequency.setValueAtTime(174, this.audioContext.currentTime + 4); // F3
-        oscillator2.frequency.setValueAtTime(196, this.audioContext.currentTime + 6); // G3
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
 
-        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(this.musicGain);
 
-        return { oscillator1, oscillator2, gainNode, duration: 8 };
+            oscillator.type = track.type;
+            oscillator.frequency.setValueAtTime(track.frequency, this.audioContext.currentTime);
+
+            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.musicVolume, this.audioContext.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.8);
+
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + 1);
+        };
+
+        // Play notes at intervals based on tempo
+        const intervals = {
+            slow: 2000,
+            medium: 1500,
+            fast: 1000
+        };
+
+        playNote(); // Play first note immediately
+        this.musicInterval = setInterval(playNote, intervals[track.tempo] || 1500);
+
+        console.log(`🎵 Playing simple BGM: ${trackName}`);
     }
 
-    createBattleMusic() {
-        if (!this.audioContext || !this.musicGain) return null;
-
-        // Create an intense battle theme
-        const oscillator1 = this.audioContext.createOscillator();
-        const oscillator2 = this.audioContext.createOscillator();
-        const oscillator3 = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-
-        oscillator1.connect(gainNode);
-        oscillator2.connect(gainNode);
-        oscillator3.connect(gainNode);
-        gainNode.connect(this.musicGain);
-
-        // Intense minor progression: Am - F - C - G
-        oscillator1.type = 'sawtooth';
-        oscillator2.type = 'square';
-        oscillator3.type = 'triangle';
-
-        // Lead melody (higher octave)
-        oscillator1.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
-        oscillator1.frequency.setValueAtTime(698, this.audioContext.currentTime + 1.5); // F5
-        oscillator1.frequency.setValueAtTime(1047, this.audioContext.currentTime + 3); // C6
-        oscillator1.frequency.setValueAtTime(784, this.audioContext.currentTime + 4.5); // G5
-
-        // Bass line
-        oscillator2.frequency.setValueAtTime(110, this.audioContext.currentTime); // A2
-        oscillator2.frequency.setValueAtTime(87, this.audioContext.currentTime + 1.5); // F2
-        oscillator2.frequency.setValueAtTime(131, this.audioContext.currentTime + 3); // C3
-        oscillator2.frequency.setValueAtTime(98, this.audioContext.currentTime + 4.5); // G2
-
-        // Mid harmony
-        oscillator3.frequency.setValueAtTime(440, this.audioContext.currentTime); // A4
-        oscillator3.frequency.setValueAtTime(349, this.audioContext.currentTime + 1.5); // F4
-        oscillator3.frequency.setValueAtTime(523, this.audioContext.currentTime + 3); // C5
-        oscillator3.frequency.setValueAtTime(392, this.audioContext.currentTime + 4.5); // G4
-
-        gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
-
-        return { oscillator1, oscillator2, oscillator3, gainNode, duration: 6 };
-    }
-
-    createVictoryMusic() {
-        if (!this.audioContext || !this.musicGain) return null;
-
-        // Create a triumphant victory theme
-        const oscillator1 = this.audioContext.createOscillator();
-        const oscillator2 = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-
-        oscillator1.connect(gainNode);
-        oscillator2.connect(gainNode);
-        gainNode.connect(this.musicGain);
-
-        // Triumphant progression: C - F - G - C
-        oscillator1.type = 'triangle';
-        oscillator2.type = 'sine';
-
-        // Victory fanfare melody
-        oscillator1.frequency.setValueAtTime(523, this.audioContext.currentTime); // C5
-        oscillator1.frequency.setValueAtTime(698, this.audioContext.currentTime + 1); // F5
-        oscillator1.frequency.setValueAtTime(784, this.audioContext.currentTime + 2); // G5
-        oscillator1.frequency.setValueAtTime(1047, this.audioContext.currentTime + 3); // C6
-
-        // Harmony
-        oscillator2.frequency.setValueAtTime(261, this.audioContext.currentTime); // C4
-        oscillator2.frequency.setValueAtTime(349, this.audioContext.currentTime + 1); // F4
-        oscillator2.frequency.setValueAtTime(392, this.audioContext.currentTime + 2); // G4
-        oscillator2.frequency.setValueAtTime(523, this.audioContext.currentTime + 3); // C5
-
-        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.05, this.audioContext.currentTime + 4);
-
-        return { oscillator1, oscillator2, gainNode, duration: 4 };
+    stopSimpleMusic() {
+        this.isPlaying = false;
+        if (this.musicInterval) {
+            clearInterval(this.musicInterval);
+            this.musicInterval = null;
+        }
+        console.log('⏹️ Simple music stopped');
     }
 
     createAttackSound() {
@@ -372,14 +319,14 @@ export class AudioManager {
 
         if (this.isMuted) {
             // Stop current background music when muted
-            this.stopBackgroundMusic();
+            this.stopSimpleMusic();
             console.log('🔇 Audio muted');
         } else {
             // Restart music when unmuted if there was a track playing
             if (this.currentTrackName) {
                 setTimeout(() => {
-                    this.playBackgroundMusic(this.currentTrackName);
-                }, 100); // Small delay to ensure audio context is ready
+                    this.startSimpleMusic(this.currentTrackName);
+                }, 100);
             }
             console.log('🔊 Audio unmuted');
         }
@@ -418,60 +365,11 @@ export class AudioManager {
 
     // Background Music Methods
     playBackgroundMusic(trackName) {
-        // Store the track name for potential restart after unmute
-        this.currentTrackName = trackName;
-
-        if (this.isMuted || !this.audioContext || !this.musicTracks[trackName]) return;
-
-        // Resume audio context if suspended
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-        }
-
-        // Stop current music
-        this.stopBackgroundMusic();
-
-        try {
-            const musicData = this.musicTracks[trackName]();
-            if (musicData) {
-                this.currentMusic = musicData;
-
-                // Start all oscillators
-                Object.keys(musicData).forEach(key => {
-                    if (key.startsWith('oscillator') && musicData[key].start) {
-                        musicData[key].start(this.audioContext.currentTime);
-                        musicData[key].stop(this.audioContext.currentTime + musicData.duration);
-                    }
-                });
-
-                // Set up looping
-                setTimeout(() => {
-                    if (this.currentMusic === musicData && this.currentTrackName === trackName) {
-                        this.playBackgroundMusic(trackName); // Loop the music
-                    }
-                }, musicData.duration * 1000);
-
-                console.log(`🎵 Playing BGM: ${trackName}`);
-            }
-        } catch (error) {
-            console.warn('Error playing background music:', error);
-        }
+        this.startSimpleMusic(trackName);
     }
 
     stopBackgroundMusic() {
-        if (this.currentMusic) {
-            try {
-                // Stop all oscillators
-                Object.keys(this.currentMusic).forEach(key => {
-                    if (key.startsWith('oscillator') && this.currentMusic[key].stop) {
-                        this.currentMusic[key].stop();
-                    }
-                });
-            } catch (error) {
-                // Oscillators might already be stopped
-            }
-            this.currentMusic = null;
-        }
+        this.stopSimpleMusic();
     }
 
     setMusicVolume(volume) {

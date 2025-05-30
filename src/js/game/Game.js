@@ -37,10 +37,17 @@ export class Game {
 
         // Start menu music and initialize audio controls
         setTimeout(() => {
+            // Ensure audio context is resumed (required by browsers)
+            if (this.audioManager.audioContext && this.audioManager.audioContext.state === 'suspended') {
+                this.audioManager.audioContext.resume();
+            }
+
+            // Start menu music by default (unmuted)
             this.audioManager.playMenuMusic();
-            // Initialize mute button state
+
+            // Initialize mute button state (should show unmuted by default)
             this.ui.initializeMuteButton(this.audioManager);
-        }, 500); // Small delay to ensure audio context is ready
+        }, 1000); // Longer delay to ensure everything is ready
 
         console.log('🎮 Turn-Based Battle Arena initialized!');
     }
