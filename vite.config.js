@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/turnbasedgame/' : '/',
+  base: command === 'build' ? '/apps/turnbasedgame/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
